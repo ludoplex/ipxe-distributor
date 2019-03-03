@@ -1,0 +1,120 @@
+#!/usr/bin/env python
+
+import bottle
+import yaml
+import sys
+
+url_base = "/"
+
+ipxe_prepend = ""
+ipxe_append = ""
+images = {}
+nodes = {}
+nodes_by_mac = {}
+nodes_by_serial = {}
+
+default_image = "sanboot --no-describe --drive 0x80"
+ipxe_distributor = application = bottle.Bottle()
+
+
+def read_yaml_configuration(yaml_file):
+    """
+    Read YAML configuration into global data
+    :param yaml_file: str
+    :return: None
+    """
+    global images, ipxe_append, ipxe_prepend, nodes, nodes_by_mac, nodes_by_serial, default_image
+
+    try:
+        fd = open(yaml_file, "r")
+        raw = fd.read()
+        fd.close()
+    except ValueError:
+        images = {}
+        nodes = {}
+        nodes_by_mac = {}
+        nodes_by_serial = {}
+        return
+    except IOError:
+        images = {}
+        nodes = {}
+        nodes_by_mac = {}
+        nodes_by_serial = {}
+        return
+
+    try:
+        y = yaml.load(raw)
+    except yaml.error.YAMLError:
+        images = {}
+        nodes = {}
+        nodes_by_mac = {}
+        nodes_by_serial = {}
+        return
+
+    if "default" in y:
+        if "default_image" in y["default"]:
+            default_image = "\n".join(y["default"]["default_image"])
+        if "ipxe_append" in y["default"]:
+            ipxe_append = "\n".join(y["default"]["ipxe_append"])
+        if "ipxe_prepend" in y["default"]:
+            ipxe_prepend = "\n".join(y["default"]["ipxe_prepend"])
+
+    if "images" in y:
+        for img in y["images"].keys():
+            if "action" in y["images"][img]:
+                images[img] = y["images"][img]
+
+    if "nodes" in y:
+        for n in y["nodes"].keys():
+            if "image" not in y["nodes"][n]:
+                continue
+
+            nodes[n] = y["nodes"][n]["image"]
+
+            if "mac" in y["nodes"][n]:
+                nodes_by_mac[y["nodes"][n]["mac"]] = n
+            if "serial" in y["nodes"][n]:
+                nodes_by_serial[y["nodes"][n]["serial"]] = n
+
+
+@ipxe_distributor.get(url_base + "mac/<mac:re:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:"
+                                 "[0-9a-fA-F]{2}:[0-9a-fA-F]{2}>")
+@ipxe_distributor.get(url_base + "mac/<mac:re:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:"
+                                 "[0-9a-fA-F]{2}:[0-9a-fA-F]{2}>/")
+def ipxe_node_by_mac(mac):
+    """
+    Load iPXE by MAC address
+    :param mac: str
+    :return: str
+    """
+    ipxe = "#!ipxe\n"
+
+    if mac in nodes_by_mac:
+        ipxe += ipxe_prepend
+        node = nodes_by_mac[mac]
+        image_name = nodes[node]
+
+#        image_desc = image_name
+#        if "description" in images[image_name]:
+#            image_desc = images[image_name]["description"]
+
+        image = "\n".join(images[image_name]["action"])
+        ipxe += image
+        ipxe += ipxe_append
+    else:
+        ipxe += default_image
+
+    # Make sure to prepend a new line
+    ipxe += "\n"
+
+    return ipxe
+
+
+if __name__ == "__main__":
+    host = "localhost"
+    port = 8080
+    read_yaml_configuration(sys.argv[1])
+    print(images)
+    print(nodes)
+    bottle.run(app=ipxe_distributor, host=host, port=port, debug=True)
+    sys.exit(0)
