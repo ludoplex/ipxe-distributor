@@ -26,13 +26,11 @@ default:
 
 images:
     centos_7.6:
-        display: "CentOS 7.6"
         action:
             - "initrd http://mirror.centos.org/centos/7/os/x86_64/images/pxeboot/initrd.img"
             - "chain http://mirror.centos.org/centos/7/os/x86_64/images/pxeboot/vmlinuz net.ifnames=0 biosdevname=0 ksdevice=eth2 inst.repo=http://mirror.centos.org/centos/7/os/x86_64/ inst.lang=en_GB inst.keymap=be-latin1 inst.vnc inst.vncpassword=CHANGEME ip=x.x.x.x netmask=x.x.x.x gateway=x.x.x.x dns=x.x.x.x"
 
     redhat_7:
-        display: "RedHat 7"
         action:
             - "initrd http://mirror.redhat.org/redhat/7/os/x86_64/images/pxeboot/initrd.img"
             - "chain http://mirror.redhat.org/redhat/7/os/x86_64/images/pxeboot/vmlinuz net.ifnames=0 biosdevname=0 ksdevice=eth2 inst.repo=http://mirror.redhat.org/redhat/7/os/x86_64/ inst.lang=en_GB inst.keymap=be-latin1 inst.vnc inst.vncpassword=CHANGEME ip=x.x.x.x netmask=x.x.x.x gateway=x.x.x.x dns=x.x.x.x"
@@ -47,7 +45,7 @@ nodes:
         serial: SX123456789
     server03:
         mac: cafebabebabe
-        image: "redhat_7"
+        image: "default"
         serial: SX123456789
     servergroup:
         image: "redhat_7"
