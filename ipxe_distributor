@@ -97,10 +97,10 @@ def read_yaml_configuration(yaml_file):
                 nodes_by_group[y["nodes"][n]["group"]] = n
 
 
-@ipxe_distributor.get("/mac/<mac:re:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:"
-                      "[0-9a-fA-F]{2}:[0-9a-fA-F]{2}>")
-@ipxe_distributor.get("/mac/<mac:re:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:"
-                      "[0-9a-fA-F]{2}:[0-9a-fA-F]{2}>/")
+@ipxe_distributor.get("/mac/<mac:re:[0-9a-fA-F]{2}[:\-]?[0-9a-fA-F]{2}[:\-]?[0-9a-fA-F]{2}[:\-]?[0-9a-fA-F]{2}[:\-]?"
+                      "[0-9a-fA-F]{2}[:\-]?[0-9a-fA-F]{2}>")
+@ipxe_distributor.get("/mac/<mac:re:[0-9a-fA-F]{2}[:\-]?[0-9a-fA-F]{2}[:\-]?[0-9a-fA-F]{2}[:\-]?[0-9a-fA-F]{2}[:\-]?"
+                      "[0-9a-fA-F]{2}[:\-]?[0-9a-fA-F]{2}>/")
 def ipxe_node_by_mac(mac):
     """
     Load iPXE by MAC address

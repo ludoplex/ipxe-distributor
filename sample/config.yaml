@@ -42,7 +42,11 @@ nodes:
         mac: 12:34:56:78:9a:bc
         image: "centos_7.6"
     server02:
-        mac: bc:9a:78:56:34:12
+        mac: bc-9a-78-56-34-12
+        image: "redhat_7"
+        serial: SX123456789
+    server03:
+        mac: cafebabebabe
         image: "redhat_7"
         serial: SX123456789
     servergroup:
