@@ -1,5 +1,10 @@
 ---
+global:
+    host: "127.0.0.1"
+    port: 8080
+
 default:
+    # prepend to _all_ IPXE data
     ipxe_prepend:
         - |
             # ! *-timeout is in ms !
@@ -8,61 +13,13 @@ default:
             
             # set default action to "exit" if not set
             isset ${menu-default} || set menu-default exit_ipxe
-            
-            # Main menu
-            :main_menu
-            
+
+    # append to _all_ IPXE data
     ipxe_append:
         - "choose --timeout ${menu-timeout} --default ${menu-default} selected || goto abort"
         - "set menu-timeout 0"
-        - |
-            goto ${selected}
 
-            :cancel
-            echo Label cancel has been reached, dropping to iPXE interactive shell
-            
-            :shell
-            echo iPXE interactive shell, type "exit" (without the quotes) to go back to te main menu
-            shell
-            set menu-timout 0
-            set submenu-timeout 0
-            goto main_menu
-            
-            :failed
-            echo !!! Something went wrong, dropping to interactive iPXE shell !!!
-            goto shell
-            
-            :reboot
-            reboot
-            
-            :exit_ipxe
-            exit
-            
-            :config
-            config
-            goto main_menu
-            
-            # used from sub menus to go back to the main menu
-            :back_to_main_menu
-            set submenu-timeout 0
-            clear submenu-default
-            goto main_menu
-            
-            :centos7
-            echo Here we would install CentOS 7 - press any key to return to the main menu
-            ifconf --configurator dhcp net0
-            prompt
-            goto back_to_main_menu
-            
-            :grml
-            ifconf --configurator dhcp net0 || goto failed
-            initrd http://10.0.0.1/grml/2018.12/grml64-2018.12.initrd
-            chain  http://10.0.0.1/grml/2018.12/grml64-2018.12.kernel boot=live fetch=http://10.0.0.1/grml/2018.12/grml64-full.squashfs nomce noeject vga=normal nofb text
-            
-            echo If you are at this point, the network boot for GRML 2018.12 failed. Press any key to go back to the main menu
-            prompt
-            
-            goto back_to_main_menu
+    # default if there is no match
     default_image:
         - "# Boot the first local HDD"
         - "sanboot --no-describe --drive 0x80"
@@ -74,8 +31,21 @@ images:
             - "initrd http://mirror.centos.org/centos/7/os/x86_64/images/pxeboot/initrd.img"
             - "chain http://mirror.centos.org/centos/7/os/x86_64/images/pxeboot/vmlinuz net.ifnames=0 biosdevname=0 ksdevice=eth2 inst.repo=http://mirror.centos.org/centos/7/os/x86_64/ inst.lang=en_GB inst.keymap=be-latin1 inst.vnc inst.vncpassword=CHANGEME ip=x.x.x.x netmask=x.x.x.x gateway=x.x.x.x dns=x.x.x.x"
 
+    redhat_7:
+        display: "RedHat 7"
+        action:
+            - "initrd http://mirror.redhat.org/redhat/7/os/x86_64/images/pxeboot/initrd.img"
+            - "chain http://mirror.redhat.org/redhat/7/os/x86_64/images/pxeboot/vmlinuz net.ifnames=0 biosdevname=0 ksdevice=eth2 inst.repo=http://mirror.redhat.org/redhat/7/os/x86_64/ inst.lang=en_GB inst.keymap=be-latin1 inst.vnc inst.vncpassword=CHANGEME ip=x.x.x.x netmask=x.x.x.x gateway=x.x.x.x dns=x.x.x.x"
+
 nodes:
     server01:
         mac: 12:34:56:78:9a:bc
         image: "centos_7.6"
+    server02:
+        mac: bc:9a:78:56:34:12
+        image: "redhat_7"
+        serial: SX123456789
+    servergroup:
+        image: "redhat_7"
+        group: "ldapservers"
 
