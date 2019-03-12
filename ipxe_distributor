@@ -212,6 +212,53 @@ def ipxe_node_by_group(group):
     return ipxe
 
 
+@ipxe_distributor.get("/default")
+@ipxe_distributor.get("/default/")
+def ipxe_default():
+    """
+    Server default configuration
+    :return: str
+    """
+    global configuration_file
+    read_yaml_configuration(configuration_file)
+
+    ipxe = "#!ipxe\n" + default_image
+    return ipxe
+
+
+# reject all other HTTP methods besides GET
+@ipxe_distributor.post()
+@ipxe_distributor.put()
+@ipxe_distributor.delete()
+def reject_all_other_http_methods():
+    """
+    Reject all other HTTP methods except GET
+    :return: str
+    """
+    raise bottle.HTTPError(status=400, body="HTTP 400 - Bad Request")
+
+
+@bottle.error(404)
+def http_status_404(error):
+    """
+    HTTP 404 error handler
+    :param error:
+    :return: str
+    """
+    return "HTTP 404 - Not found"
+
+
+@bottle.error(500)
+def http_status_500(error):
+    """
+    HTTP 404 error handler
+    :param error:
+    :return: str
+    """
+    return "HTTP 500 - Internal Server Error"
+
+
+
 if __name__ == "__main__":
     host = "localhost"
     port = 8080
