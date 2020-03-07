@@ -1,3 +1,7 @@
+**_Note:_** Because I'm running my own servers for serveral years, main development is done at at https://git.ypbind.de/cgit/ipxe-distributor/
+
+----
+
 # `ipxe-distributor` - A webservice to provide iPXE configuration based on MAC,serial or group name
 ## Preface
 This service provides a defined method to serve [iPXE](https://ipxe.org/) configuration from a single
