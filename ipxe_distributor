@@ -37,9 +37,8 @@ def read_yaml_configuration(yaml_file):
     global listen_host, listen_port, nodes_by_group
 
     try:
-        fd = open(yaml_file, "r")
-        raw = fd.read()
-        fd.close()
+        with open(yaml_file, "r") as fd:
+            raw = fd.read()
     except ValueError:
         images = {}
         nodes = {}
@@ -222,8 +221,7 @@ def ipxe_default():
     global configuration_file
     read_yaml_configuration(configuration_file)
 
-    ipxe = "#!ipxe\n" + default_image
-    return ipxe
+    return "#!ipxe\n" + default_image
 
 
 # reject all other HTTP methods besides GET
